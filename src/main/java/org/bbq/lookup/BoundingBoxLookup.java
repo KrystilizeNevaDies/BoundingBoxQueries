@@ -2,58 +2,44 @@ package org.bbq.lookup;
 
 import org.bbq.BoundingBox;
 import org.bbq.QueryItem;
+import org.bbq.collection.BoundingBoxCollection;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
- * Lookup for bounding boxes in 3D space.
- * @param <T> The type of the value associated with the bounding box.
+ * Lookup for 3D BoundingBox-Value pairs.
+ * <p>
+ *     Neither the values nor the bounding boxes, nor the pair as a whole is unique.
+ *     you may insert as many entries with the same value and bounding box as you like, the size of the collection will
+ *     still increase.<br><br>
+ *     For example, If I insert any entry (lets call it "A") two times, then remove it once, the collection will still
+ *     contain one entry ("A").
+ * </p>
+ *
+ * @param <T> The type of the value associated with a bounding box.
  */
-public interface BoundingBoxLookup<T> extends BoundingBoxLookups {
-
-    // Mutability
-
-    /**
-     * Inserts a bounding box with the given value.
-     * @param boundingBox The bounding box to insert.
-     * @param value The value to associate with the bounding box.
-     */
-    void insert(BoundingBox boundingBox, T value);
+public interface BoundingBoxLookup<T> extends BoundingBoxCollection<T> {
 
     /**
      * Removes the given bounding box and its associated value from the lookup.
-     * @param boundingBox The bounding box to remove.
      * @param value The value to remove.
+     * @param boundingBox The bounding box to remove.
      */
-    void remove(BoundingBox boundingBox, T value);
+    void remove(T value, BoundingBox boundingBox);
 
-    // Querying
-
-    /**
-     * @return The number of bounding box-value pairs in the lookup.
-     * @apiNote This method is always O(1).
-     */
-    double size();
-
-    /**
-     * Visits each value in the lookup.
-     * @param visitor The visitor to visit the values with.
-     * @apiNote This method is always O(n).
-     */
-    void visitAll(Visitor<T> visitor);
-
-    /**
-     * Visits each value in the lookup that intersects with the given query item.
-     * @param queryItem The query item to check for intersections.
-     * @param visitor The visitor to visit the bounding box with.
-     */
-    void visitIntersecting(QueryItem queryItem, Visitor<T> visitor);
-
-    interface Visitor<T> {
-        /**
-         * Visits a bounding box-value pair.
-         * @param boundingBox The bounding box.
-         * @param value The value.
-         * @param stop A runnable that, when run, stops any more visits.
-         */
-        void visit(BoundingBox boundingBox, T value, Runnable stop);
+    /** {@inheritDoc} */
+    @Override
+    default void remove(T value) {
+        List<Entry<T>> boundingBoxes = new ArrayList<>();
+        for (Entry<T> entry : visit(QueryItem.ALL)) {
+            if (Objects.equals(entry.value(), value)) {
+                boundingBoxes.add(entry);
+            }
+        }
+        for (Entry<T> entry : boundingBoxes) {
+            remove(value, entry.boundingBox());
+        }
     }
 }
