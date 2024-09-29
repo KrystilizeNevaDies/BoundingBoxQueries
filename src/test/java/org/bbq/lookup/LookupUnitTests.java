@@ -46,6 +46,26 @@ public class LookupUnitTests {
     }
 
     @Test
+    public void elementCountTrackingAfterRemoval() {
+        for (BoundingBoxLookup<String> lookup : generateLookups()) {
+
+            BoundingBox boundingBox = new BoundingBox(new Vec(0, 0, 0), new Vec(1, 1, 1));
+
+            // double insert + remove
+            lookup.insert("1.0", boundingBox);
+            lookup.insert("1.0", boundingBox);
+
+            assertEquals(2, visitList(lookup, boundingBox).size());
+
+            lookup.remove("1.0", boundingBox);
+
+            assertEquals(1, visitList(lookup, boundingBox).size());
+
+            lookup.remove("1.0", boundingBox);
+        }
+    }
+
+    @Test
     public void randomElementInsertionTests() {
         Collection<BoundingBoxLookup<String>> lookups = generateLookups();
         Random random = new Random(42);

@@ -106,10 +106,10 @@ class GridLookupImpl<T> implements BoundingBoxLookup<T> {
 
     @Override
     public @NotNull Iterable<BoundingBoxLookup.Entry<T>> visit(QueryItem queryItem) {
-        Set<Entry<T>> visited = new HashSet<>();
+        Map<Entry<T>, Boolean> visited = new IdentityHashMap<>();
         var iterator = forGridInstances(queryItem).iterator();
 
-        Set<Entry<T>> unused = new HashSet<>();
+        Map<Entry<T>, Boolean> unused = new IdentityHashMap<>();
 
         return () -> new Iterator<>() {
 
@@ -123,13 +123,14 @@ class GridLookupImpl<T> implements BoundingBoxLookup<T> {
                         continue;
                     }
                     for (Entry<T> entry : entries[index]) {
-                        if (visited.contains(entry)) {
+                        if (visited.containsKey(entry)) {
                             continue;
                         }
                         if (!entry.boundingBox().intersects(queryItem)) {
                             continue;
                         }
-                        unused.add(entry);
+                        unused.put(entry, true);
+                        visited.put(entry, true);
                     }
                 }
 
@@ -142,9 +143,8 @@ class GridLookupImpl<T> implements BoundingBoxLookup<T> {
                     throw new NoSuchElementException("No more elements");
                 }
 
-                Entry<T> next = unused.iterator().next();
+                Entry<T> next = unused.keySet().iterator().next();
                 unused.remove(next);
-                visited.add(next);
                 return next;
             }
         };

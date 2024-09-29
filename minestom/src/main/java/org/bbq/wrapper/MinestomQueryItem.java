@@ -7,7 +7,6 @@ import org.bbq.lookup.BoundingBoxLookup;
  */
 public sealed interface MinestomQueryItem permits MinestomQueryItem.All, MinestomQueryItem.BoundingBox, MinestomQueryItem.Line, MinestomQueryItem.Vec {
     MinestomQueryItem ALL = All.INSTANCE;
-
     enum All implements MinestomQueryItem {
         INSTANCE
     }

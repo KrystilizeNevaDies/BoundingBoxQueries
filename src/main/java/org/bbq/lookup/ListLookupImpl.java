@@ -24,7 +24,7 @@ class ListLookupImpl<T> implements BoundingBoxLookup<T> {
 
     @Override
     public void remove(T value, BoundingBox boundingBox) {
-        entries.removeIf(entry -> entry.boundingBox().equals(boundingBox) && Objects.equals(entry.value(), value));
+        entries.remove(new Entry<>(value, boundingBox));
     }
 
     @Override

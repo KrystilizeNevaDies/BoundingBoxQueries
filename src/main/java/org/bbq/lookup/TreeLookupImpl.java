@@ -163,7 +163,9 @@ public class TreeLookupImpl<T> implements BoundingBoxLookup<T> {
 
         if (node.boundingBox().intersects(queryItem)) {
             if (node instanceof Leaf<T> leaf) {
-                results.accept(leaf.entry());
+                for (int i = 0; i < leaf.count; i++) {
+                    results.accept(leaf.entry());
+                }
             } else {
                 Branch<T> branch = (Branch<T>) node;
                 queryNode(branch.left, queryItem, results);
